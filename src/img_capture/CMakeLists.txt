@@ -11,11 +11,24 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   message_generation
+  cmake_modules
+  sensor_msgs
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenCV REQUIRED)
+find_package(Eigen REQUIRED)
+#find apriltagscpp pkg
+find_package(apriltagscpp REQUIRED)
+
+#import yaml-cpp lib
+include(FindPkgConfig)
+pkg_check_modules(Yaml REQUIRED yaml-cpp)
+
+#CGAL requires that -frounding-math be set
+add_definitions(-frounding-math)
+
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -56,6 +69,14 @@ find_package(OpenCV REQUIRED)
 add_message_files(
   FILES
   imgRawData.msg
+  coord2D.msg
+  coord3D.msg
+  tagcenter.msg
+  tagcorner.msg
+  pose_all.msg
+  quat.msg
+  apriltagInfo.msg
+  apriltagInfos.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -114,10 +135,10 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES img_capture
-#  CATKIN_DEPENDS actionlib actionlib_msgs opencv roscpp rospy std_msgs
-#  DEPENDS system_lib
+  INCLUDE_DIRS include
+  #LIBRARIES img_capture
+  #CATKIN_DEPENDS actionlib actionlib_msgs opencv roscpp rospy std_msgs geometry_msgs  
+  #DEPENDS system_lib
 )
 
 ###########
@@ -125,11 +146,16 @@ catkin_package(
 ###########
 
 ## Specify additional locations of header files
-## Your package locations should be listed before other locations
+## Your package locations shiould be listed before other locations
 # include_directories(include)
 include_directories(
+  include/  
   ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
+  ${Eigen_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
+  ${Yaml_INCLUDE_DIRS}
+  ${apriltagscpp_INCLUDE_DIR}/apriltagscpp
 )
 
 ## Declare a C++ library
@@ -146,13 +172,14 @@ include_directories(
 # add_executable(img_capture_node src/img_capture_node.cpp)
 add_executable(imgCapture src/imgCapture.cpp)
 add_executable(imgSubscriberTest src/imgSubscriberTest.cpp)
+add_executable(apriltagFinder src/apriltag.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(img_capture_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(imgCapture img_capture_generate_messages_cpp)
 add_dependencies(imgSubscriberTest img_capture_generate_messages_cpp)
-
+add_dependencies(apriltagFinder img_capture_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(img_capture_node
@@ -160,7 +187,11 @@ add_dependencies(imgSubscriberTest img_capture_generate_messages_cpp)
 # )
 target_link_libraries(imgCapture ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries(imgSubscriberTest ${catkin_LIBRARIES} ${OpenCV_LIBS})
-
+target_link_libraries(apriltagFinder ${catkin_LIBRARIES} 
+				     ${OpenCV_LIBS} 
+				     ${Eigen_LIBS} 
+			             ${Yaml_LIBRARIES} 
+                                     ${apriltagscpp_LIBRARY})
 
 #############
 ## Install ##
