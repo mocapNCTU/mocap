@@ -30,6 +30,9 @@ int main(int argc, char **argv)
 	camera.open(0);
 	while(!camera.isOpened());	
 
+	//sequence count
+	uint seq_count = 0;
+
 	while(ros::ok())
 	{		
 		//capture image
@@ -41,6 +44,11 @@ int main(int argc, char **argv)
 		{
 			msg.img.push_back(image.data[i]);
 		}
+
+		//fill msg information
+		msg.header.seq = seq_count++;
+		msg.header.stamp = ros::Time::now();
+		msg.header.frame_id = "Test camera";
 		msg.row = image.rows;
 		msg.col = image.cols;		
 		msg.channels = image.channels();
