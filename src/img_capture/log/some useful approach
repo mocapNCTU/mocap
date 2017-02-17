@@ -1,0 +1,2 @@
+1.after install use "sudo updatedb" to refresh data base
+2.package's global variable is provide by "Find{pkgName}.cmake", use "locate" to find it 

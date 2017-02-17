@@ -13,22 +13,20 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   cmake_modules
   sensor_msgs
+  camera_info_manager
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenCV REQUIRED)
 find_package(Eigen REQUIRED)
+#message(STATUS ${Eigen3_INCLUDE_DIR})
 #find apriltagscpp pkg
 find_package(apriltagscpp REQUIRED)
 
 #import yaml-cpp lib
 include(FindPkgConfig)
 pkg_check_modules(Yaml REQUIRED yaml-cpp)
-
-#CGAL requires that -frounding-math be set
-add_definitions(-frounding-math)
-
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -104,6 +102,9 @@ generate_messages(
 	std_msgs
 	actionlib_msgs
 )
+
+#CGAL requires that -frounding-math be set
+add_definitions(-frounding-math)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -189,7 +190,7 @@ target_link_libraries(imgCapture ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries(imgSubscriberTest ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries(apriltagFinder ${catkin_LIBRARIES} 
 				     ${OpenCV_LIBS} 
-				     ${Eigen_LIBS} 
+				     ${Eigen3_LIBS} 
 			             ${Yaml_LIBRARIES} 
                                      ${apriltagscpp_LIBRARY})
 

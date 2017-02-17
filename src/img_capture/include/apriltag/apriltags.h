@@ -4,6 +4,7 @@
 
 //include ros usage
 #include "ros/ros.h"
+#include <camera_info_manager/camera_info_manager.h>
 #include "sensor_msgs/Image.h"
 #include "sensor_msgs/CameraInfo.h"
 #include <opencv2/opencv.hpp>
@@ -53,7 +54,7 @@ sensor_msgs::CameraInfo camera_info_;
 // Ros part
 ros::Publisher img_publisher;
 ros::Subscriber img_subscriber;
-ros::NodeHandle node_;
+ros::NodeHandlePtr node_;
 
 // Settings and local information
 bool viewer_;
@@ -76,13 +77,13 @@ void GetMarkerTransformUsingOpenCV(const TagDetection& detection, Eigen::Matrix4
 void InfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info);
 void GetParameterValues();
 double GetTagSize(int);
-void InitializeTags();
+void InitializeTags(); //need to be called after node setup
 
 //new defined function
 	//rcv callback function
 void img_rcv_callback(const img_capture::imgRawData::ConstPtr&);
 	//initialization function
-void setupConnection(ros::NodeHandle&);
+void setupConnection(ros::NodeHandlePtr);
 	//apriltag detect and generate msg to send
 img_capture::apriltagInfos* apriltagDetection(const img_capture::imgRawData::ConstPtr&);
 

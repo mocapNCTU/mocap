@@ -1,0 +1,9 @@
+2017/2/17
+ADD 
+	1.Add launch file, can used by "roslaunch img_capture img_capture.launch"
+
+WARNING
+	1.ApriltagFinder: WARNING: NEW QUAD ALGORITHM REQUESTED, BUT COMPILED WITHOUT CGAL SUPPORT, FALLING BACK TO OLD ALGORITHM.
+
+PROBLEM
+	1.Eigen library, when use find_package(Eigen REQUIRED) will be fine, however this is a deprecated approach. Instead find_package(Eigen3 REQUIRED) still can find package, but cmake cannot find its INCLUDE_DIR (now keep using find_package(Eigen REQUIRED))

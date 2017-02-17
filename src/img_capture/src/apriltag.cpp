@@ -5,9 +5,7 @@ int main(int argc, char **argv)
 {
 	//initial ros node
 	ros::init(argc, argv, "apriltag_finder");
-
-	//create node handler
-	ros::NodeHandle node_;
+	node_ = boost::make_shared<ros::NodeHandle>();
 	
 	//check apriltag parameter
 	GetParameterValues();
@@ -40,10 +38,10 @@ void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
 	img_publisher.publish(*info);
 }
 
-void setupConnection(ros::NodeHandle& node_obj)
+void setupConnection(ros::NodeHandlePtr node_obj)
 {
-	img_publisher = node_obj.advertise<img_capture::apriltagInfo>("/apriltag_info", 10);
-	img_subscriber = node_obj.subscribe("/img_raw", 1, img_rcv_callback);
+	img_publisher = node_obj->advertise<img_capture::apriltagInfos>("/apriltag_info", 10);
+	img_subscriber = node_obj->subscribe("/img_raw", 1, img_rcv_callback);
 }
 
 img_capture::apriltagInfos* apriltagDetection(const img_capture::imgRawData::ConstPtr& msg)
@@ -226,32 +224,52 @@ void InfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info)
 
 void InitializeTags()
 {
+	//set up apriltag information
     tag_params.newQuadAlgorithm = 1;
     family_ = new TagFamily(tag_family_name_);
     detector_ = new TagDetector(*family_, tag_params);
+
+	//read camera.yaml to generate cameraInfo
+	std::string camera_name, camera_info_url;
+	node_->param("camera_name", camera_name, std::string("head_camera"));
+	node_->param("camera_info_url", camera_info_url, std::string(""));
+	boost::shared_ptr<camera_info_manager::CameraInfoManager> camInfo;
+	camInfo.reset(new camera_info_manager::CameraInfoManager(*node_, camera_name, camera_info_url));
+
+	if(!camInfo->isCalibrated())
+	{
+		camInfo->setCameraName("fuck! I have no name");
+		sensor_msgs::CameraInfo cam_info;
+		cam_info.width = 640;
+		cam_info.height = 480;
+		camInfo->setCameraInfo(cam_info);
+	}
+
+	camera_info_ = sensor_msgs::CameraInfo(camInfo->getCameraInfo());
+	has_camera_info_ = true;
 }
 
 void GetParameterValues()
 {
     // Load node-wide configuration values.
-    node_.param("tag_family", tag_family_name_, DEFAULT_TAG_FAMILY);
-    node_.param("default_tag_size", default_tag_size_, DEFAULT_TAG_SIZE);
-    node_.param("display_type", display_type_, DEFAULT_DISPLAY_TYPE);
-    node_.param("marker_thickness", marker_thickness_, 0.01);
+    node_->param("tag_family", tag_family_name_, DEFAULT_TAG_FAMILY);
+    node_->param("default_tag_size", default_tag_size_, DEFAULT_TAG_SIZE);
+    node_->param("display_type", display_type_, DEFAULT_DISPLAY_TYPE);
+    node_->param("marker_thickness", marker_thickness_, 0.01);
 
-    node_.param("viewer", viewer_, false);
-    node_.param("publish_detections_image", publish_detections_image_, false);
-    node_.param("display_marker_overlay", display_marker_overlay_, true);
-    node_.param("display_marker_outline", display_marker_outline_, false);
-    node_.param("display_marker_id", display_marker_id_, false);
-    node_.param("display_marker_edges", display_marker_edges_, false);
-    node_.param("display_marker_axes", display_marker_axes_, false);
+    node_->param("viewer", viewer_, false);
+    node_->param("publish_detections_image", publish_detections_image_, false);
+    node_->param("display_marker_overlay", display_marker_overlay_, true);
+    node_->param("display_marker_outline", display_marker_outline_, false);
+    node_->param("display_marker_id", display_marker_id_, false);
+    node_->param("display_marker_edges", display_marker_edges_, false);
+    node_->param("display_marker_axes", display_marker_axes_, false);
 
     ROS_INFO("Tag Family: %s", tag_family_name_.c_str());
 
     // Load tag specific configuration values.
     XmlRpc::XmlRpcValue tag_data;
-    node_.param("tag_data", tag_data, tag_data);
+    node_->param("tag_data", tag_data, tag_data);
 
     // Iterate through each tag in the configuration.
     XmlRpc::XmlRpcValue::ValueStruct::iterator it;
