@@ -17,19 +17,19 @@ int main(int argc, char **argv)
 	//create publisher to sending message, topic name = "/img_raw", buffer number = 10(prevent the leakage caused by sending rate > recieve rate)
 	ros::Publisher img_publisher = node_obj.advertise<img_capture::imgRawData>("/img_raw", 1000);
 
-	//loop rate = 30hz
-	ros::Rate loop_rate(60);
+	//loop rate = 60hz
+	int fps = 30;
+	ros::Rate loop_rate(30);
 	
-
 	//msg to send
 	img_capture::imgRawData msg;
 
 	//open camera
 	Mat image;
 	VideoCapture camera;
-	camera.open(0);
+	camera.open(1);
 	while(!camera.isOpened());	
-	camera.set(CAP_PROP_FPS, 60);
+	camera.set(CAP_PROP_FPS, 30);
 	
 	//sequence count
 	uint seq_count = 0;

@@ -80,10 +80,7 @@ double GetTagSize(int);
 void InitializeTags(); //need to be called after node setup
 
 //new defined function
-	//rcv callback function
+	//rcv callback function include apriltag detection
 void img_rcv_callback(const img_capture::imgRawData::ConstPtr&);
 	//initialization function
 void setupConnection(ros::NodeHandlePtr);
-	//apriltag detect and generate msg to send
-img_capture::apriltagInfos* apriltagDetection(const img_capture::imgRawData::ConstPtr&);
-

@@ -20,51 +20,31 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
-{
-	Mat* image = new Mat(msg->row, msg->col, CV_8UC3);
-
-	//copy data
-	for(int i=0; i<msg->img.size(); ++i)
-	{
-		image->data[i] = msg->img[i];
-	}
-	
-	//detect image if it contain apriltags
-	img_capture::apriltagInfos* info = apriltagDetection(msg);
-
-	//publish msg
-	img_publisher.publish(*info);
-}
-
 void setupConnection(ros::NodeHandlePtr node_obj)
 {
 	img_publisher = node_obj->advertise<img_capture::apriltagInfos>("/apriltag_info", 1000);
 	img_subscriber = node_obj->subscribe("/img_raw", 1000, img_rcv_callback);
 }
 
-img_capture::apriltagInfos* apriltagDetection(const img_capture::imgRawData::ConstPtr& msg)
+void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
 {
 	//check if there is available camera information
 	if(!has_camera_info_)
 	{
 		ROS_WARN("No Camera Info Received Yet");
-		return NULL;
+		return ;
 	}
 
 	//extract image from msg
-	Mat* image = new Mat(msg->row, msg->col, CV_8UC3);
+	Mat image = Mat(msg->row, msg->col, CV_8UC3);
 	for(int i=0; i<msg->img.size(); ++i)
 	{
-		image->data[i] = msg->img[i];
+		image.data[i] = msg->img[i];
 	}	
 
 	//turn image from BGR to gray image
 	Mat subscribed_gray;
-	cvtColor(*image, subscribed_gray, cv::COLOR_RGB2GRAY);
-
-	//release image mat
-	image->release();
+	cvtColor(image, subscribed_gray, cv::COLOR_RGB2GRAY);
 
     cv::Point2d opticalCenter;
     if ((camera_info_.K[2] > 1.0) && (camera_info_.K[5] > 1.0))
@@ -84,11 +64,15 @@ img_capture::apriltagInfos* apriltagDetection(const img_capture::imgRawData::Con
 	//process detection
     detector_->process(subscribed_gray, opticalCenter, detections);
 
-	//fill header messages
-    img_capture::apriltagInfos* apriltag_detections = new img_capture::apriltagInfos();
-    apriltag_detections->header.frame_id = msg->header.frame_id;
-    apriltag_detections->header.stamp = msg->header.stamp;
+	//release image mat
+	image.release();
+	subscribed_gray.release();
 
+	//fill header messages
+    img_capture::apriltagInfos apriltag_detections = img_capture::apriltagInfos();
+    apriltag_detections.header.frame_id = msg->header.frame_id;
+    apriltag_detections.header.stamp = msg->header.stamp;
+	ROS_INFO("AprilDetection of Seq : %d \n", msg->header.seq);
 	//arrange tags which are detected into apriltagInfos
     for(int i = 0; i < detections.size(); ++i)
     {
@@ -136,10 +120,15 @@ img_capture::apriltagInfos* apriltagDetection(const img_capture::imgRawData::Con
 		apriltag_det.corner.fourth.xpos = detections[i].p[3].x;
 		apriltag_det.corner.fourth.ypos = detections[i].p[3].y;
 		apriltag_det.corner.fourth.zpos = 1;
-		apriltag_detections->tags.push_back(apriltag_det);
+		apriltag_detections.tags.push_back(apriltag_det);
     }
 
-	return apriltag_detections;
+	//publish msg
+	img_publisher.publish(apriltag_detections);
+	ros::spinOnce();
+
+	//release
+	(apriltag_detections.tags).clear();
 }
 
 double GetTagSize(int tag_id)
@@ -230,7 +219,7 @@ void InitializeTags()
 
 	//read camera.yaml to generate cameraInfo
 	std::string camera_name, camera_info_url;
-	node_->param("camera_name", camera_name, std::string("head_camera"));
+	node_->param("/ApriltagHandler/camera_name", camera_name, std::string("head_camera"));
 	node_->param("/ApriltagHandler/camera_info_url", camera_info_url, std::string(""));
 	boost::shared_ptr<camera_info_manager::CameraInfoManager> camInfo;
 	camInfo.reset(new camera_info_manager::CameraInfoManager(*node_, camera_name, camera_info_url));
@@ -251,24 +240,24 @@ void InitializeTags()
 void GetParameterValues()
 {
     // Load node-wide configuration values.
-    node_->param("tag_family", tag_family_name_, DEFAULT_TAG_FAMILY);
-    node_->param("default_tag_size", default_tag_size_, DEFAULT_TAG_SIZE);
-    node_->param("display_type", display_type_, DEFAULT_DISPLAY_TYPE);
-    node_->param("marker_thickness", marker_thickness_, 0.01);
+    node_->param("/ApriltagHandler/tag_family", tag_family_name_, DEFAULT_TAG_FAMILY);
+    node_->param("/ApriltagHandler/default_tag_size", default_tag_size_, DEFAULT_TAG_SIZE);
+    node_->param("/ApriltagHandler/display_type", display_type_, DEFAULT_DISPLAY_TYPE);
+    node_->param("/ArpiltagHandler/marker_thickness", marker_thickness_, 0.01);
 
-    node_->param("viewer", viewer_, false);
-    node_->param("publish_detections_image", publish_detections_image_, false);
-    node_->param("display_marker_overlay", display_marker_overlay_, true);
-    node_->param("display_marker_outline", display_marker_outline_, false);
-    node_->param("display_marker_id", display_marker_id_, false);
-    node_->param("display_marker_edges", display_marker_edges_, false);
-    node_->param("display_marker_axes", display_marker_axes_, false);
+    node_->param("/ApriltagHandler/viewer", viewer_, false);
+    node_->param("/ApriltagHandler/publish_detections_image", publish_detections_image_, false);
+    node_->param("/ApriltagHandler/display_marker_overlay", display_marker_overlay_, true);
+    node_->param("/ApriltagHandler/display_marker_outline", display_marker_outline_, false);
+    node_->param("/ApriltagHandler/display_marker_id", display_marker_id_, false);
+    node_->param("/ApriltagHandler/display_marker_edges", display_marker_edges_, false);
+    node_->param("/ApriltagHandler/display_marker_axes", display_marker_axes_, false);
 
     ROS_INFO("Tag Family: %s", tag_family_name_.c_str());
 
     // Load tag specific configuration values.
     XmlRpc::XmlRpcValue tag_data;
-    node_->param("tag_data", tag_data, tag_data);
+    node_->param("/ApriltagHandler/tag_data", tag_data, tag_data);
 
     // Iterate through each tag in the configuration.
     XmlRpc::XmlRpcValue::ValueStruct::iterator it;
@@ -282,8 +271,12 @@ void GetParameterValues()
         if (tag_values.hasMember("size")) 
         {
             tag_sizes_[tag_id] = static_cast<double>(tag_values["size"]);
-            ROS_DEBUG("Setting tag%d to size %f m.", tag_id, tag_sizes_[tag_id]);
-        }
+            ROS_INFO("Setting tag%d to size %f m.", tag_id, tag_sizes_[tag_id]);
+        } 
+		else 
+		{
+			ROS_INFO("Nothing useful");
+		}
     }
 }
 
