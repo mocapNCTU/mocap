@@ -232,7 +232,7 @@ void InitializeTags()
 	//read camera.yaml to generate cameraInfo
 	std::string camera_name, camera_info_url;
 	node_->param("camera_name", camera_name, std::string("head_camera"));
-	node_->param("camera_info_url", camera_info_url, std::string(""));
+	node_->param("/ApriltagHandler/camera_info_url", camera_info_url, std::string(""));
 	boost::shared_ptr<camera_info_manager::CameraInfoManager> camInfo;
 	camInfo.reset(new camera_info_manager::CameraInfoManager(*node_, camera_name, camera_info_url));
 
