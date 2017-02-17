@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 	//param[0] = CV_IMWRITE_PNG_COMPRESSION;
 	//param[1] = quality;
 	param[0] = CV_IMWRITE_JPEG_QUALITY;
-	param[1] = 50;	
+	param[1] = 45;	
 
 	while(ros::ok())
 	{		
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 		//compressed method
 		//imencode(".png", image, msg.img, param);
 		imencode(".jpeg", image, msg.img, param);
-		cout << image.rows * image.cols * image.channels() << "   " << msg.img.size() << endl;
+		//cout << image.rows * image.cols * image.channels() << "   " << msg.img.size() << endl;
 		//fill msg information
 		msg.header.seq = seq_count++;
 		msg.header.stamp = ros::Time::now();
