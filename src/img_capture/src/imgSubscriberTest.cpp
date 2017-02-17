@@ -8,6 +8,7 @@ using namespace cv;
 
 void image_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
 {
+	/*
 	Mat image = Mat(msg->row, msg->col, CV_8UC3);
 
 	//copy data
@@ -15,10 +16,13 @@ void image_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
 	{
 		image.data[i] = msg->img[i];	
 	}
+	*/
+	Mat image = imdecode(Mat(msg->img), CV_LOAD_IMAGE_COLOR);
 	
 	//display image
 	imshow("Display Test", image);
     waitKey(10);	
+	
 }
 
 

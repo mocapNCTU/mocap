@@ -2,6 +2,8 @@
   <!--img capture node-->
   <node name="ImgPublisher" pkg="img_capture" type="imgCapture" output="screen" >
     <param name="img_quality" value="100" />
+    <param name="system_rate" value="60" />
+    <param name="network_smooth" value="true" />
   </node>
 
   <!--apriltag node-->

@@ -36,11 +36,14 @@ void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
 	}
 
 	//extract image from msg
+	/*
 	Mat image = Mat(msg->row, msg->col, CV_8UC3);
 	for(int i=0; i<msg->img.size(); ++i)
 	{
 		image.data[i] = msg->img[i];
-	}	
+	}
+	*/
+	Mat image = imdecode(Mat(msg->img), CV_LOAD_IMAGE_COLOR);	
 
 	//turn image from BGR to gray image
 	Mat subscribed_gray;

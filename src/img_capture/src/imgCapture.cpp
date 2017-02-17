@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 	ros::Publisher img_publisher = node_obj.advertise<img_capture::imgRawData>("/img_raw", 1000);
 
 	//loop rate = 60hz
-	int fps = 30;
+	int fps = 60;
 	ros::Rate loop_rate(fps);
 	
 	//msg to send
@@ -34,18 +34,33 @@ int main(int argc, char **argv)
 	//sequence count
 	uint seq_count = 0;
 
+	//compress function
+	int quality = 1;
+	vector<int> param = vector<int>(2);
+	//param[0] = CV_IMWRITE_PNG_COMPRESSION;
+	//param[1] = quality;
+	param[0] = CV_IMWRITE_JPEG_QUALITY;
+	param[1] = 50;	
+
 	while(ros::ok())
 	{		
 		//capture image
 		camera >> image;
-
-		int size = image.rows * image.cols * image.channels();
 		msg.img.clear();
+		
+		//uncompressed method
+		/*
+		int size = image.rows * image.cols * image.channels();
 		for(int i=0; i<size; ++i)
 		{
 			msg.img.push_back(image.data[i]);
 		}
+		*/
 
+		//compressed method
+		//imencode(".png", image, msg.img, param);
+		imencode(".jpeg", image, msg.img, param);
+		cout << image.rows * image.cols * image.channels() << "   " << msg.img.size() << endl;
 		//fill msg information
 		msg.header.seq = seq_count++;
 		msg.header.stamp = ros::Time::now();
@@ -53,6 +68,9 @@ int main(int argc, char **argv)
 		msg.row = image.rows;
 		msg.col = image.cols;		
 		msg.channels = image.channels();
+		msg.compressionFlag = CV_IMWRITE_PNG_COMPRESSION;
+		msg.compressionQuality = quality;
+		msg.compressName = ".png";
 
 		//sending image msg
 		img_publisher.publish(msg);
