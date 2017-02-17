@@ -14,7 +14,6 @@ int main(int argc, char **argv)
 	//setup ros connection with other nodes
 	setupConnection(node_);
 	
-
 	//hold ros at this position
 	ros::spin();
 
@@ -40,8 +39,8 @@ void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
 
 void setupConnection(ros::NodeHandlePtr node_obj)
 {
-	img_publisher = node_obj->advertise<img_capture::apriltagInfos>("/apriltag_info", 10);
-	img_subscriber = node_obj->subscribe("/img_raw", 1, img_rcv_callback);
+	img_publisher = node_obj->advertise<img_capture::apriltagInfos>("/apriltag_info", 1000);
+	img_subscriber = node_obj->subscribe("/img_raw", 1000, img_rcv_callback);
 }
 
 img_capture::apriltagInfos* apriltagDetection(const img_capture::imgRawData::ConstPtr& msg)

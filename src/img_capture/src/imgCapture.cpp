@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle node_obj;
 
 	//create publisher to sending message, topic name = "/img_raw", buffer number = 10(prevent the leakage caused by sending rate > recieve rate)
-	ros::Publisher img_publisher = node_obj.advertise<img_capture::imgRawData>("/img_raw", 10);
+	ros::Publisher img_publisher = node_obj.advertise<img_capture::imgRawData>("/img_raw", 1000);
 
 	//loop rate = 30hz
 	ros::Rate loop_rate(60);
@@ -29,7 +29,8 @@ int main(int argc, char **argv)
 	VideoCapture camera;
 	camera.open(0);
 	while(!camera.isOpened());	
-
+	camera.set(CAP_PROP_FPS, 60);
+	
 	//sequence count
 	uint seq_count = 0;
 
@@ -60,6 +61,7 @@ int main(int argc, char **argv)
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
-
+	//exit, close the camera
+	camera.release();
 	return 0;
 }
