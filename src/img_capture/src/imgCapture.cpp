@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 
 	//loop rate = 60hz
 	int fps = 30;
-	ros::Rate loop_rate(30);
+	ros::Rate loop_rate(fps);
 	
 	//msg to send
 	img_capture::imgRawData msg;
@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 	VideoCapture camera;
 	camera.open(1);
 	while(!camera.isOpened());	
-	camera.set(CAP_PROP_FPS, 30);
+	camera.set(CAP_PROP_FPS, fps);
 	
 	//sequence count
 	uint seq_count = 0;
