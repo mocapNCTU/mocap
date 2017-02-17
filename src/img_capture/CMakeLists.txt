@@ -19,7 +19,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenCV REQUIRED)
-find_package(Eigen REQUIRED)
+find_package(Eigen 3 REQUIRED)
+find_package(CGAL REQUIRED)
 #message(STATUS ${Eigen3_INCLUDE_DIR})
 #find apriltagscpp pkg
 find_package(apriltagscpp REQUIRED)
