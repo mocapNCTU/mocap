@@ -1,0 +1,43 @@
+<launch>
+  <!--define some arguments-->
+  <arg name="sensor_abbr" default="_dev_" />
+  <arg name="sensor_prefix" default="ApriltagHandler" />
+  <arg name="sensor_info_name" default="apriltag_info" />
+
+  <!--launch each camera module-->
+  <!--launch first camera node-->
+  <include file="$(find img_capture)/launch/imgDetection.launch">
+    <arg name="node_suffix" default="$(arg sensor_abbr)" />
+    <arg name="use_device_id" default="0" />
+    <arg name="show_img" default="false" />
+    <arg name="sensor_output_name" default="$(arg sensor_info_name)" />
+    <arg name="handler_name" default="$(arg sensor_prefix)" />  
+  </include>
+
+  <!--launch second camera node-->
+  <include file="$(find img_capture)/launch/imgDetection.launch">
+    <arg name="node_suffix" default="$(arg sensor_abbr)" />
+    <arg name="use_device_id" default="1" />
+    <arg name="show_img" default="false" />
+    <arg name="sensor_output_name" default="$(arg sensor_info_name)" />
+    <arg name="handler_name" default="$(arg sensor_prefix)" />    
+  </include>
+
+  <!--launch third camera node-->
+  <include file="$(find img_capture)/launch/imgDetection.launch">
+    <arg name="node_suffix" default="$(arg sensor_abbr)" />
+    <arg name="use_device_id" default="2" />
+    <arg name="show_img" default="false" />  
+    <arg name="sensor_output_name" default="$(arg sensor_info_name)" />
+    <arg name="handler_name" default="$(arg sensor_prefix)" />  
+  </include>
+
+  <!--launch synchronizer module-->
+  <!--apriltag infos sync node-->
+  <node name="Synchronizer" pkg="img_capture" type="synchronizer" output="screen">
+    <param name="cam_num" value="3" />
+    <param name="info_prefix" value="$(arg sensor_info_name)" />
+    <param name="device_prefix" value="$(arg sensor_prefix)$(arg sensor_abbr)" />
+  </node>
+
+</launch>

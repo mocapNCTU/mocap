@@ -4,6 +4,7 @@
     <param name="img_quality" value="100" />
     <param name="system_rate" value="60" />
     <param name="network_smooth" value="true" />
+    <param name="cam_id" value="1" />
   </node>
 
   <!--apriltag node-->
@@ -15,6 +16,7 @@
     <param name="display_type" value="CUBE" />
     <param name="marker_thickness" value="0.02" />
     <rosparam command="delete" param="tag_data" />
+   <param name="imgSource" value="ImgPublisher" />
     <rosparam param="tag_data">
       "1": 
         size: 0.035
@@ -25,5 +27,13 @@
 
   <!--img viewer-->
   <node name="ImgViewer" pkg="img_capture" type="imgSubscriberTest" output="screen">
+    <param name="imgSource" value="ImgPublisher" />
   </node>
+
+  <!--apriltag infos sync node-->
+  <node name="Synchronizer" pkg="img_capture" type="synchronizer" output="screen" required="true">
+    <param name="cam_num" value="1" />
+    <param name="info_prefix" value="/apriltag_info" />
+  </node>	
+
 </launch>

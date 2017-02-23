@@ -1,12 +1,15 @@
 ///include apriltag function
 #include "apriltag/apriltags.h"
 
+
+string mynamePrefix;
 int main(int argc, char **argv)
 {
 	//initial ros node
 	ros::init(argc, argv, "apriltag_finder");
 	node_ = boost::make_shared<ros::NodeHandle>();
-	
+	mynamePrefix = ros::this_node::getName();	
+	mynamePrefix = mynamePrefix + "/";
 	//check apriltag parameter
 	GetParameterValues();
 	InitializeTags();
@@ -22,8 +25,16 @@ int main(int argc, char **argv)
 
 void setupConnection(ros::NodeHandlePtr node_obj)
 {
-	img_publisher = node_obj->advertise<img_capture::apriltagInfos>("/apriltag_info", 1000);
-	img_subscriber = node_obj->subscribe("/img_raw", 1000, img_rcv_callback);
+	string subPath, pub_name;
+	node_obj->param(mynamePrefix + "imgSource", subPath, subPath);
+	node_obj->param(mynamePrefix + "out_name", pub_name, pub_name);
+	if(subPath.empty() || pub_name.empty())
+	{
+		ROS_WARN("cannot find img source for apriltag, exit with error");
+		exit(-1);
+	}
+	img_publisher = node_obj->advertise<img_capture::apriltagInfos>(mynamePrefix + pub_name, 1000);
+	img_subscriber = node_obj->subscribe(subPath + "/" + string("img_raw"), 1000, img_rcv_callback);
 }
 
 void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
@@ -75,7 +86,8 @@ void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
     img_capture::apriltagInfos apriltag_detections = img_capture::apriltagInfos();
     apriltag_detections.header.frame_id = msg->header.frame_id;
     apriltag_detections.header.stamp = msg->header.stamp;
-	ROS_INFO("AprilDetection of Seq : %d \n", msg->header.seq);
+	apriltag_detections.header.seq = msg->header.seq;
+	//ROS_INFO("AprilDetection of Seq : %d \n", msg->header.seq);
 	//arrange tags which are detected into apriltagInfos
     for(int i = 0; i < detections.size(); ++i)
     {
@@ -95,7 +107,7 @@ void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
         Eigen::Quaternion<double> q(R);
         
         double tag_size = GetTagSize(detections[i].id);
-        cout << tag_size << " " << detections[i].id << endl;
+        //cout << tag_size << " " << detections[i].id << endl;
  
         // Fill in AprilTag detection.
         img_capture::apriltagInfo apriltag_det;
@@ -222,8 +234,8 @@ void InitializeTags()
 
 	//read camera.yaml to generate cameraInfo
 	std::string camera_name, camera_info_url;
-	node_->param("/ApriltagHandler/camera_name", camera_name, std::string("head_camera"));
-	node_->param("/ApriltagHandler/camera_info_url", camera_info_url, std::string(""));
+	node_->param(mynamePrefix + "camera_name", camera_name, std::string("head_camera"));
+	node_->param(mynamePrefix + "camera_info_url", camera_info_url, std::string(""));
 	boost::shared_ptr<camera_info_manager::CameraInfoManager> camInfo;
 	camInfo.reset(new camera_info_manager::CameraInfoManager(*node_, camera_name, camera_info_url));
 
@@ -242,25 +254,26 @@ void InitializeTags()
 
 void GetParameterValues()
 {
+	
     // Load node-wide configuration values.
-    node_->param("/ApriltagHandler/tag_family", tag_family_name_, DEFAULT_TAG_FAMILY);
-    node_->param("/ApriltagHandler/default_tag_size", default_tag_size_, DEFAULT_TAG_SIZE);
-    node_->param("/ApriltagHandler/display_type", display_type_, DEFAULT_DISPLAY_TYPE);
-    node_->param("/ArpiltagHandler/marker_thickness", marker_thickness_, 0.01);
+    node_->param(mynamePrefix + "tag_family", tag_family_name_, DEFAULT_TAG_FAMILY);
+    node_->param(mynamePrefix + "default_tag_size", default_tag_size_, DEFAULT_TAG_SIZE);
+    node_->param(mynamePrefix + "display_type", display_type_, DEFAULT_DISPLAY_TYPE);
+    node_->param(mynamePrefix + "marker_thickness", marker_thickness_, 0.01);
 
-    node_->param("/ApriltagHandler/viewer", viewer_, false);
-    node_->param("/ApriltagHandler/publish_detections_image", publish_detections_image_, false);
-    node_->param("/ApriltagHandler/display_marker_overlay", display_marker_overlay_, true);
-    node_->param("/ApriltagHandler/display_marker_outline", display_marker_outline_, false);
-    node_->param("/ApriltagHandler/display_marker_id", display_marker_id_, false);
-    node_->param("/ApriltagHandler/display_marker_edges", display_marker_edges_, false);
-    node_->param("/ApriltagHandler/display_marker_axes", display_marker_axes_, false);
+    node_->param(mynamePrefix + "viewer", viewer_, false);
+    node_->param(mynamePrefix + "publish_detections_image", publish_detections_image_, false);
+    node_->param(mynamePrefix + "display_marker_overlay", display_marker_overlay_, true);
+    node_->param(mynamePrefix + "display_marker_outline", display_marker_outline_, false);
+    node_->param(mynamePrefix + "display_marker_id", display_marker_id_, false);
+    node_->param(mynamePrefix + "display_marker_edges", display_marker_edges_, false);
+    node_->param(mynamePrefix + "display_marker_axes", display_marker_axes_, false);
 
     ROS_INFO("Tag Family: %s", tag_family_name_.c_str());
-
+	
     // Load tag specific configuration values.
     XmlRpc::XmlRpcValue tag_data;
-    node_->param("/ApriltagHandler/tag_data", tag_data, tag_data);
+    node_->param(mynamePrefix + "tag_data", tag_data, tag_data);
 
     // Iterate through each tag in the configuration.
     XmlRpc::XmlRpcValue::ValueStruct::iterator it;

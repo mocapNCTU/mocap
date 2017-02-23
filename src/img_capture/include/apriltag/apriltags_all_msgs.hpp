@@ -13,5 +13,6 @@
 //#include "img_capture/APrilTagDetections.h"
 #include "img_capture/apriltagInfo.h"
 #include "img_capture/apriltagInfos.h"
+#include "img_capture/apriltagInfosBundle.h"
 
 #endif

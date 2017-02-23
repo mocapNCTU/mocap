@@ -13,9 +13,10 @@ int main(int argc, char **argv)
 
 	//create node handler
 	ros::NodeHandle node_obj;
+	string mynamePrefix = ros::this_node::getName() + string("/");
 
 	//create publisher to sending message, topic name = "/img_raw", buffer number = 10(prevent the leakage caused by sending rate > recieve rate)
-	ros::Publisher img_publisher = node_obj.advertise<img_capture::imgRawData>("/img_raw", 1000);
+	ros::Publisher img_publisher = node_obj.advertise<img_capture::imgRawData>(mynamePrefix + "img_raw", 1000);
 
 	//loop rate = 60hz
 	int fps = 60;
@@ -27,12 +28,20 @@ int main(int argc, char **argv)
 	//open camera
 	Mat image;
 	VideoCapture camera;
-	camera.open(1);
+	int frameID;
+	node_obj.param(mynamePrefix + "cam_id", frameID, -1);
+	if(frameID == -1)
+	{
+		ROS_WARN("cannot get valid camera device id, exit with error");
+		exit(-1);
+	}
+	camera.open(frameID);
 	while(!camera.isOpened());	
 	camera.set(CAP_PROP_FPS, fps);
 	
 	//sequence count
 	uint seq_count = 0;
+
 
 	//compress function
 	int quality = 1;
@@ -64,7 +73,7 @@ int main(int argc, char **argv)
 		//fill msg information
 		msg.header.seq = seq_count++;
 		msg.header.stamp = ros::Time::now();
-		msg.header.frame_id = "Test camera";
+		msg.header.frame_id = "Test_camera " + to_string(frameID);
 		msg.row = image.rows;
 		msg.col = image.cols;		
 		msg.channels = image.channels();

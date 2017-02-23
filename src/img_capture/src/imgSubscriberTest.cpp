@@ -8,15 +8,6 @@ using namespace cv;
 
 void image_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
 {
-	/*
-	Mat image = Mat(msg->row, msg->col, CV_8UC3);
-
-	//copy data
-	for(int i=0; i<msg->img.size(); ++i)
-	{
-		image.data[i] = msg->img[i];	
-	}
-	*/
 	Mat image = imdecode(Mat(msg->img), CV_LOAD_IMAGE_COLOR);
 	
 	//display image
@@ -37,9 +28,19 @@ int main(int argc, char **argv)
 
 	//create node handler
 	ros::NodeHandle node_obj;
+	
+	string imgPath;
+	string mynamePrefix = ros::this_node::getName() + "/";
+	node_obj.param(mynamePrefix + "imgSource", imgPath, imgPath);
+
+	if(imgPath.empty())
+	{
+		ROS_WARN("failed to find imgSource for viewer, exit with error");
+		exit(-1);
+	}
 
 	//subscribe raw image for testing
-	ros::Subscriber image_subscriber = node_obj.subscribe("/img_raw", 10, image_rcv_callback);
+	ros::Subscriber image_subscriber = node_obj.subscribe(imgPath + "/img_raw", 10, image_rcv_callback);
 	
 	//ros timing control function
 	ros::spin();

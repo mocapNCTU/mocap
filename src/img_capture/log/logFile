@@ -7,3 +7,11 @@ WARNING
 
 PROBLEM
 	1.Eigen library, when use find_package(Eigen REQUIRED) will be fine, however this is a deprecated approach. Instead find_package(Eigen3 REQUIRED) still can find package, but cmake cannot find its INCLUDE_DIR (now keep using find_package(Eigen REQUIRED))
+
+
+2017/2/24
+ADD
+	1.Finish sync process(not test yet), add multi launch file
+
+FOUND
+	1."init done" shown on terminal is caused by openCV 
