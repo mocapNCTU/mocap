@@ -36,6 +36,7 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 	camera.open(frameID);
+	//camera.set(CV_CAP_PROP_FOURCC, CV_FOURCC('M', 'J', 'P', 'G'));
 	while(!camera.isOpened());	
 	camera.set(CAP_PROP_FPS, fps);
 	

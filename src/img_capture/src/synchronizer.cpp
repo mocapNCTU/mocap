@@ -10,10 +10,11 @@ int main(int argc, char **argv)
 	//check apriltag parameter
 	getParameters();
 	syncMsg = Seats::create();
-
+	msgArray = new queue<img_capture::apriltagInfos*>[cameraSyncNumber];
+    	
 	//setup ros connection with other nodes
 	setupConnection();
-	
+
 	//hold ros at this position
 	sync_publish();
 	return 0;
@@ -21,75 +22,93 @@ int main(int argc, char **argv)
 
 void apriltagInfos_rcv_callback(const img_capture::apriltagInfos::ConstPtr& msg)
 {
-	cout << msg->header.frame_id  <<endl;
-	int seq = msg->header.seq;
-	int currentSeq = syncMsg->getSeqNum();
-	if(currentSeq != -1)  //means there are some msgs queueing right now
-	{
-		if(seq == currentSeq) //same sequence	
-		{
-			syncMsg->sitIn(msg);
-			if(syncMsg->isSync())
-			{
-				msgQueue.push(syncMsg);
-			}
-			syncMsg = Seats::create();
-		}
-		else
-		{
-			/*
-				if seq > currentSeq
-				    means currentSeq lose packet and there is no way to resend
-				so we sync the new seq number
-				else (seq < currentSeq)
-				    never happen(it's TCP based by default), TODO if use UDP based
-			*/
-			if(seq > currentSeq)
-			{
-				syncMsg->release();
-				syncMsg->reset();
-				syncMsg->setSeqNum(seq);
-				syncMsg->sitIn(msg);
-				if(syncMsg->isSync())
-				{
-					msgQueue.push(syncMsg);
-				}
-				syncMsg = Seats::create();
-			}
-			else  
-			{
-				//never happen
-				
-			}
-		}
-	}
-	else  //means there is no msgs queueing right now
-	{
-		syncMsg->setSeqNum(seq);
-		syncMsg->sitIn(msg);
-		if(syncMsg->isSync())
-		{
-			msgQueue.push(syncMsg);
-		}
-		syncMsg = Seats::create();
-	}
+	int id = extractID(msg->header.frame_id);
+	img_capture::apriltagInfos* info = new img_capture::apriltagInfos(*msg);
+	msgArray[id].push(info);
 }
 
 void sync_publish()
 {
 	while(ros::ok())
 	{
-		if(!msgQueue.empty())
+		//check if each has something to send
+		bool needcheck = true;
+		for(int i=0; i<cameraSyncNumber; ++i)
 		{
-			Seats* tmp = msgQueue.front();
-			infoBundle_publisher.publish(*(tmp->genInfoBundle()));
-			msgQueue.pop();
-			delete tmp;
+			if(msgArray[i].empty())
+			{
+				needcheck = false;
+				break;
+			}		
 		}
-		else
+
+		if(needcheck)
 		{
-			//do nothing
+			//check if all in same sequence
+			int seq = msgArray[0].front()->header.seq;
+			int advSeq = seq;
+			bool hasAdvance = false; //seqnumber > first seq
+			bool hasDelay = false; //seqnumber < first seq
+			for(int i=1; i<cameraSyncNumber; ++i)
+			{
+				int tmp = msgArray[i].front()->header.seq;
+				if(tmp > seq)
+				{
+					hasAdvance = true;
+					if(tmp > advSeq)
+					{
+						advSeq = tmp;
+					}
+				}
+				else if(tmp < seq)
+				{
+					hasDelay = true;
+				}
+				if(hasAdvance && hasDelay)  //there must be lots of work to do after, so just break
+				{
+					break;
+				}
+			}
+			
+			if((!hasAdvance) && (!hasDelay))  //can send message
+			{
+				for(int i=0; i<cameraSyncNumber; ++i)
+				{
+					syncMsg->sitIn(msgArray[i].front(), i);
+					img_capture::apriltagInfos* info = msgArray[i].front();
+					msgArray[i].pop();
+					delete info;
+				}
+				infoBundle_publisher.publish(*(syncMsg->genInfoBundle()));
+				delete syncMsg;
+				syncMsg = Seats::create();
+			}
+			else if((!hasAdvance) && hasDelay)  //need to sync to "seq"
+			{
+				for(int i=0; i<cameraSyncNumber; ++i)  //let i from 1 will be okay too, since seq is get from i=0
+				{
+					if(msgArray[i].front()->header.seq < seq)
+					{
+						img_capture::apriltagInfos* info = msgArray[i].front();
+						msgArray[i].pop();
+						delete info;
+					}
+				}
+			}
+			else  //need to sync to "seqAdv"
+			{
+				for(int i=0; i<cameraSyncNumber; ++i)
+				{
+					if(msgArray[i].front()->header.seq < advSeq)
+					{
+						img_capture::apriltagInfos* info = msgArray[i].front();
+						msgArray[i].pop();
+						delete info;
+					}
+				}
+			}
 		}
+
 		ros::spinOnce();
 	}
 }

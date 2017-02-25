@@ -37,6 +37,26 @@ string mynamePrefix;
 int seatSuccessSend = 0;
 int seatCreated = 0;
 
+//simple id extract
+int extractID(string str)
+{ 
+	int pos = 0;
+	for(int i=0; i<str.length(); ++i)
+	{
+		if(isdigit(str[i]))
+		{
+			pos = i;
+			break;
+		}
+		if((i == (str.length()-1)) && (isdigit(str[i]) == false))
+		{
+			ROS_WARN("failed to extract id, exit with error");
+			exit(-1);
+		}
+	}
+	return stoi(str.substr(pos));
+}
+
 typedef class SYNC_SEAT
 {
 private:
@@ -131,6 +151,17 @@ public:
 			return true;
 		}
 		return false;
+	}
+
+	bool sitIn(img_capture::apriltagInfos* msg, int id)
+	{
+		if((id < cameraSyncNumber) && (seats[id] == nullptr))
+		{
+			seats[id] = new img_capture::apriltagInfos(*msg);
+			--seatRemain;
+			return true;
+		}
+		return false;
 	}	
 	
 	img_capture::apriltagInfos** getData()
@@ -175,6 +206,7 @@ public:
 bool isInCallBack = false;
 Seats* syncMsg;
 queue<Seats*> msgQueue;
+queue<img_capture::apriltagInfos*>* msgArray;
  
 //funcitons
 void getParameters();
