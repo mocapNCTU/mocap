@@ -162,6 +162,17 @@ public:
 			return true;
 		}
 		return false;
+	}
+
+	bool sitIn_shallow(img_capture::apriltagInfos* msg, int id)
+	{
+		if(id < cameraSyncNumber)
+		{
+			seats[id] = msg;
+			--seatRemain;
+			return true;
+		}
+		return false;
 	}	
 	
 	img_capture::apriltagInfos** getData()
@@ -188,6 +199,17 @@ public:
 		{
 			seats[i] = nullptr;
 		}	
+	}
+
+	void reValid()
+	{
+		for(int i=0; i<cameraSyncNumber; ++i)
+		{
+			delete seats[i];
+			seats[i] = nullptr;
+		}
+		seatRemain = cameraSyncNumber;
+		seqNum = -1;
 	}
 
 	static SYNC_SEAT* create()

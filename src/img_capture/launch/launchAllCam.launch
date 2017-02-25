@@ -6,6 +6,7 @@
 
   <!--launch each camera module-->
   <!--launch first camera node-->
+  <!--
   <include file="$(find img_capture)/launch/imgDetection.launch">
     <arg name="node_suffix" default="$(arg sensor_abbr)" />
     <arg name="use_device_id" default="0" />
@@ -13,6 +14,7 @@
     <arg name="sensor_output_name" default="$(arg sensor_info_name)" />
     <arg name="handler_name" default="$(arg sensor_prefix)" />  
   </include>
+  -->
 
   <!--launch second camera node-->
   <include file="$(find img_capture)/launch/imgDetection.launch">
@@ -27,6 +29,15 @@
   <include file="$(find img_capture)/launch/imgDetection.launch">
     <arg name="node_suffix" default="$(arg sensor_abbr)" />
     <arg name="use_device_id" default="2" />
+    <arg name="show_img" default="false" />  
+    <arg name="sensor_output_name" default="$(arg sensor_info_name)" />
+    <arg name="handler_name" default="$(arg sensor_prefix)" />  
+  </include>
+
+  <!--launch fourth camera node-->
+  <include file="$(find img_capture)/launch/imgDetection.launch">
+    <arg name="node_suffix" default="$(arg sensor_abbr)" />
+    <arg name="use_device_id" default="3" />
     <arg name="show_img" default="false" />  
     <arg name="sensor_output_name" default="$(arg sensor_info_name)" />
     <arg name="handler_name" default="$(arg sensor_prefix)" />  

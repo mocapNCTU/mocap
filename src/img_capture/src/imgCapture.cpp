@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	ros::Publisher img_publisher = node_obj.advertise<img_capture::imgRawData>(mynamePrefix + "img_raw", 1000);
 
 	//loop rate = 60hz
-	int fps = 60;
+	int fps = 30;
 	ros::Rate loop_rate(fps);
 	
 	//msg to send

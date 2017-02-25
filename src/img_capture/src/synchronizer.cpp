@@ -1,6 +1,7 @@
 //include synchronizer function
 #include "sync/sync.hpp"
 
+int offset = 1; //to avoid my web cam
 int main(int argc, char **argv)
 {
 	//initial ros node
@@ -22,13 +23,14 @@ int main(int argc, char **argv)
 
 void apriltagInfos_rcv_callback(const img_capture::apriltagInfos::ConstPtr& msg)
 {
-	int id = extractID(msg->header.frame_id);
+	int id = extractID(msg->header.frame_id) - offset;
 	img_capture::apriltagInfos* info = new img_capture::apriltagInfos(*msg);
 	msgArray[id].push(info);
 }
 
 void sync_publish()
 {
+	ros::Rate loop_rate(240);
 	while(ros::ok())
 	{
 		//check if each has something to send
@@ -74,14 +76,12 @@ void sync_publish()
 			{
 				for(int i=0; i<cameraSyncNumber; ++i)
 				{
-					syncMsg->sitIn(msgArray[i].front(), i);
-					img_capture::apriltagInfos* info = msgArray[i].front();
+					syncMsg->sitIn_shallow(msgArray[i].front(), i);
 					msgArray[i].pop();
-					delete info;
 				}
 				infoBundle_publisher.publish(*(syncMsg->genInfoBundle()));
-				delete syncMsg;
-				syncMsg = Seats::create();
+				ros::spinOnce();
+				syncMsg->reValid();
 			}
 			else if((!hasAdvance) && hasDelay)  //need to sync to "seq"
 			{
@@ -94,6 +94,7 @@ void sync_publish()
 						delete info;
 					}
 				}
+				ros::spinOnce();
 			}
 			else  //need to sync to "seqAdv"
 			{
@@ -106,10 +107,14 @@ void sync_publish()
 						delete info;
 					}
 				}
+				ros::spinOnce();
 			}
 		}
-
-		ros::spinOnce();
+		else
+		{
+			ros::spinOnce();
+		}
+		loop_rate.sleep();
 	}
 }
 
@@ -121,7 +126,8 @@ void setupConnection()
 	//inital subscriber array
 	for(int i=0; i<cameraSyncNumber; ++i)
 	{
-		info_subscriber.push_back(node -> subscribe(DEV_PREFIX + to_string(i) + "/" + INFO_PREFIX, 1000, apriltagInfos_rcv_callback));
+		//TODO
+		info_subscriber.push_back(node -> subscribe(DEV_PREFIX + to_string(i+offset) + "/" + INFO_PREFIX, 1000, apriltagInfos_rcv_callback));
 	}
 }
 
