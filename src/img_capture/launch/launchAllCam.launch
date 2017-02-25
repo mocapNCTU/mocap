@@ -3,6 +3,8 @@
   <arg name="sensor_abbr" default="_dev_" />
   <arg name="sensor_prefix" default="ApriltagHandler" />
   <arg name="sensor_info_name" default="apriltag_info" />
+  <arg name="use_ros_sync" default="true" />
+  <arg name="use_exact_time_sync" default="true" />
 
   <!--launch each camera module-->
   <!--launch first camera node-->
@@ -45,10 +47,19 @@
 
   <!--launch synchronizer module-->
   <!--apriltag infos sync node-->
-  <node name="Synchronizer" pkg="img_capture" type="synchronizer" output="screen">
-    <param name="cam_num" value="3" />
-    <param name="info_prefix" value="$(arg sensor_info_name)" />
-    <param name="device_prefix" value="$(arg sensor_prefix)$(arg sensor_abbr)" />
-  </node>
-
+  <group unless="$(arg use_ros_sync)">
+    <node name="Synchronizer" pkg="img_capture" type="synchronizer" output="screen">
+      <param name="cam_num" value="3" />
+      <param name="info_prefix" value="$(arg sensor_info_name)" />
+      <param name="device_prefix" value="$(arg sensor_prefix)$(arg sensor_abbr)" />
+    </node>
+  </group>
+  <group if="$(arg use_ros_sync)">
+    <node name="Synchronizer" pkg="img_capture" type="synchronizer_ros_ctrl" output="screen">
+      <param name="cam_num" value="3" />
+      <param name="info_prefix" value="$(arg sensor_info_name)" />
+      <param name="device_prefix" value="$(arg sensor_prefix)$(arg sensor_abbr)" />
+      <param name="use_algorithm" value="$(arg use_exact_time_sync)" />      
+    </node>
+  </group>
 </launch>

@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   sensor_msgs
   camera_info_manager
+  message_filters
 )
 
 ## System dependencies are found with CMake's conventions
@@ -181,6 +182,7 @@ add_executable(imgCapture src/imgCapture.cpp)
 add_executable(imgSubscriberTest src/imgSubscriberTest.cpp)
 add_executable(apriltagFinder src/apriltag.cpp)
 add_executable(synchronizer src/synchronizer.cpp)
+add_executable(synchronizer_ros_ctrl src/synchronizer_ros_ctrl.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -189,6 +191,7 @@ add_dependencies(imgCapture img_capture_generate_messages_cpp)
 add_dependencies(imgSubscriberTest img_capture_generate_messages_cpp)
 add_dependencies(apriltagFinder img_capture_generate_messages_cpp)
 add_dependencies(synchronizer img_capture_generate_messages_cpp)
+add_dependencies(synchronizer_ros_ctrl img_capture_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(img_capture_node
@@ -203,6 +206,9 @@ target_link_libraries(apriltagFinder ${catkin_LIBRARIES}
                                      ${apriltagscpp_LIBRARY})
 target_link_libraries(synchronizer ${catkin_LIBRARIES}
 				   ${Yaml_LIBRARIES})
+
+target_link_libraries(synchronizer_ros_ctrl ${catkin_LIBRARIES}
+				            ${Yaml_LIBRARIES})
 
 #############
 ## Install ##
