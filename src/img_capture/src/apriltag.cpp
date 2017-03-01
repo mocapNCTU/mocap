@@ -40,8 +40,8 @@ void setupConnection(ros::NodeHandlePtr node_obj)
 		ROS_WARN("cannot find img source for apriltag, exit with error");
 		exit(-1);
 	}
-	img_publisher = node_obj->advertise<img_capture::apriltagInfos>(mynamePrefix + pub_name, 1000);
-	img_subscriber = node_obj->subscribe(subPath + "/" + string("img_raw"), 1000, img_rcv_callback);
+	img_publisher = node_obj->advertise<img_capture::apriltagInfos>(mynamePrefix + pub_name, 5);
+	img_subscriber = node_obj->subscribe(subPath + "/" + string("img_raw"), 5, img_rcv_callback);
 }
 
 void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
@@ -149,7 +149,7 @@ void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
 
 	//publish msg
 	img_publisher.publish(apriltag_detections);
-	r->sleep();
+	
 
 	//release
 	(apriltag_detections.tags).clear();

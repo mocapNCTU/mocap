@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 	string mynamePrefix = ros::this_node::getName() + string("/");
 
 	//create publisher to sending message, topic name = "/img_raw", buffer number = 10(prevent the leakage caused by sending rate > recieve rate)
-	ros::Publisher img_publisher = node_obj.advertise<img_capture::imgRawData>(mynamePrefix + "img_raw", 1000);
+	ros::Publisher img_publisher = node_obj.advertise<img_capture::imgRawData>(mynamePrefix + "img_raw", 10);
 
 	//loop rate
 	int fps = 30;

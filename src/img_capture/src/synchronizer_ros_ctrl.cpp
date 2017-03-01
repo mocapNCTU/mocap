@@ -165,7 +165,7 @@ void rcv_call9(const INFO& a, const INFO& b, const INFO& c, const INFO& d, const
 void setupConnection()
 {
 	//build up publisher
-	infoBundle_publisher = node->advertise<img_capture::apriltagInfosBundle>("/apriltags_sync_info", 1000);
+	infoBundle_publisher = node->advertise<img_capture::apriltagInfosBundle>("/apriltags_sync_info", 10);
 
 	//build up subscribers
 	if(cameraSyncNumber >= 2)
@@ -283,6 +283,6 @@ void setupConnection()
 	}
 	else
 	{
-		oneSub = node->subscribe(DEV_PREFIX + to_string(0+offset) + "/" + INFO_PREFIX, 100, rcv_call1);
+		oneSub = node->subscribe(DEV_PREFIX + to_string(0+offset) + "/" + INFO_PREFIX, 10, rcv_call1);
 	}
 }
