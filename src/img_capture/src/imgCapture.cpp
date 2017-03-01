@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 	//create publisher to sending message, topic name = "/img_raw", buffer number = 10(prevent the leakage caused by sending rate > recieve rate)
 	ros::Publisher img_publisher = node_obj.advertise<img_capture::imgRawData>(mynamePrefix + "img_raw", 1000);
 
-	//loop rate = 60hz
+	//loop rate
 	int fps = 30;
 	ros::Rate loop_rate(fps);
 	
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 		//compressed method
 		//imencode(".png", image, msg.img, param);
 		imencode(".jpeg", image, msg.img, param);
-		//cout << image.rows * image.cols * image.channels() << "   " << msg.img.size() << endl;
+		
 		//fill msg information
 		msg.header.seq = seq_count++;
 		msg.header.stamp = ros::Time::now();
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 		msg.channels = image.channels();
 		msg.compressionFlag = CV_IMWRITE_PNG_COMPRESSION;
 		msg.compressionQuality = quality;
-		msg.compressName = ".png";
+		msg.compressName = ".jpg";
 
 		//sending image msg
 		img_publisher.publish(msg);
@@ -89,6 +89,7 @@ int main(int argc, char **argv)
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
+
 	//exit, close the camera
 	camera.release();
 	return 0;

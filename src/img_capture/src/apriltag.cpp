@@ -1,6 +1,6 @@
 ///include apriltag function
 #include "apriltag/apriltags.h"
-
+#include <omp.h>
 
 string mynamePrefix;
 int main(int argc, char **argv)
@@ -18,7 +18,13 @@ int main(int argc, char **argv)
 	setupConnection(node_);
 	
 	//hold ros at this position
-	ros::spin();
+	//use single thread spin()
+	//ros::spin();
+	
+	//use multi-thread spin()
+	int THREAD_NUM = 4;
+	ros::MultiThreadedSpinner spinner(THREAD_NUM);
+	spinner.spin();
 
 	return 0;
 }
@@ -89,7 +95,10 @@ void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
 	apriltag_detections.header.seq = msg->header.seq;
 	//ROS_INFO("AprilDetection of Seq : %d \n", msg->header.seq);
 	//arrange tags which are detected into apriltagInfos
-    for(int i = 0; i < detections.size(); ++i)
+
+
+	 
+	for(unsigned int i = 0; i < detections.size(); ++i)
     {
         // skip bad detections
         if(!detections[i].good)
@@ -140,7 +149,7 @@ void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
 
 	//publish msg
 	img_publisher.publish(apriltag_detections);
-	ros::spinOnce();
+	r.sleep();
 
 	//release
 	(apriltag_detections.tags).clear();

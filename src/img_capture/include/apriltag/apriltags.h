@@ -52,9 +52,11 @@ std::string tag_family_name_;
 sensor_msgs::CameraInfo camera_info_;
 
 // Ros part
+int fps = 30;
 ros::Publisher img_publisher;
 ros::Subscriber img_subscriber;
 ros::NodeHandlePtr node_;
+ros::Rate r(fps);
 
 // Settings and local information
 bool viewer_;

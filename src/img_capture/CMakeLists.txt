@@ -199,16 +199,9 @@ add_dependencies(synchronizer_ros_ctrl img_capture_generate_messages_cpp)
 # )
 target_link_libraries(imgCapture ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries(imgSubscriberTest ${catkin_LIBRARIES} ${OpenCV_LIBS})
-target_link_libraries(apriltagFinder ${catkin_LIBRARIES} 
-				     ${OpenCV_LIBS} 
-				     ${Eigen3_LIBS} 
-			             ${Yaml_LIBRARIES} 
-                                     ${apriltagscpp_LIBRARY})
-target_link_libraries(synchronizer ${catkin_LIBRARIES}
-				   ${Yaml_LIBRARIES})
-
-target_link_libraries(synchronizer_ros_ctrl ${catkin_LIBRARIES}
-				            ${Yaml_LIBRARIES})
+target_link_libraries(apriltagFinder ${catkin_LIBRARIES} ${OpenCV_LIBS} ${Eigen3_LIBS} ${Yaml_LIBRARIES} ${apriltagscpp_LIBRARY})
+target_link_libraries(synchronizer ${catkin_LIBRARIES} ${Yaml_LIBRARIES})
+target_link_libraries(synchronizer_ros_ctrl ${catkin_LIBRARIES} ${Yaml_LIBRARIES})
 
 #############
 ## Install ##
