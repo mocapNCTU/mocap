@@ -31,7 +31,7 @@ ros::Subscriber oneSub;
 message_filters::Subscriber<img_capture::apriltagInfos>* sub;
 ros::NodeHandlePtr node;
 int FPS = 30;
-ros::Rate r(FPS);
+ros::Rate *r;
 
 //default value
 const int CAM_NUMBER = 1;

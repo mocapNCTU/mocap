@@ -7,6 +7,7 @@ int main(int argc, char **argv)
 	//initial ros node
 	ros::init(argc, argv, "synchronizer_ros_ctrl");
 	node = boost::make_shared<ros::NodeHandle>();
+    r = new ros::Rate(FPS);
 	
 	//check sync parameters
 	getParameters();
@@ -48,7 +49,7 @@ void rcv_call1(const img_capture::apriltagInfos::ConstPtr& a)
 	Seats* msg = Seats::create();
 	msg->sitIn(a, 0);
 	infoBundle_publisher.publish(*(msg->genInfoBundle()));
-	r.sleep();
+	r->sleep();
 	delete msg;
 }
 
@@ -58,7 +59,7 @@ void rcv_call2(const INFO& a, const INFO& b)
 	msg->sitIn(a, 0);
 	msg->sitIn(b, 1);
 	infoBundle_publisher.publish(*(msg->genInfoBundle()));
-	r.sleep();
+	r->sleep();
 	delete msg;
 }
 
@@ -69,7 +70,7 @@ void rcv_call3(const INFO& a, const INFO& b, const INFO& c)
 	msg->sitIn(b, 1);
 	msg->sitIn(c, 2);
 	infoBundle_publisher.publish(*(msg->genInfoBundle()));
-	r.sleep();
+	r->sleep();
 	delete msg;
 }
 
@@ -81,7 +82,7 @@ void rcv_call4(const INFO& a, const INFO& b, const INFO& c, const INFO& d)
 	msg->sitIn(c, 2);
 	msg->sitIn(d, 3);
 	infoBundle_publisher.publish(*(msg->genInfoBundle()));
-	r.sleep();
+	r->sleep();
 	delete msg;
 }
 
@@ -94,7 +95,7 @@ void rcv_call5(const INFO& a, const INFO& b, const INFO& c, const INFO& d, const
 	msg->sitIn(d, 3);
 	msg->sitIn(e, 4);
 	infoBundle_publisher.publish(*(msg->genInfoBundle()));
-	r.sleep();
+	r->sleep();
 	delete msg;
 }
 
@@ -108,7 +109,7 @@ void rcv_call6(const INFO& a, const INFO& b, const INFO& c, const INFO& d, const
 	msg->sitIn(e, 4);
 	msg->sitIn(f, 5);
 	infoBundle_publisher.publish(*(msg->genInfoBundle()));
-	r.sleep();
+	r->sleep();
 	delete msg;
 }
 
@@ -123,7 +124,7 @@ void rcv_call7(const INFO& a, const INFO& b, const INFO& c, const INFO& d, const
 	msg->sitIn(f, 5);
 	msg->sitIn(g, 6);
 	infoBundle_publisher.publish(*(msg->genInfoBundle()));
-	r.sleep();
+	r->sleep();
 	delete msg;
 }
 
@@ -139,7 +140,7 @@ void rcv_call8(const INFO& a, const INFO& b, const INFO& c, const INFO& d, const
 	msg->sitIn(g, 6);
 	msg->sitIn(h, 7);
 	infoBundle_publisher.publish(*(msg->genInfoBundle()));
-	r.sleep();
+	r->sleep();
 	delete msg;
 }
 
@@ -156,7 +157,7 @@ void rcv_call9(const INFO& a, const INFO& b, const INFO& c, const INFO& d, const
 	msg->sitIn(h, 7);
 	msg->sitIn(i, 8);
 	infoBundle_publisher.publish(*(msg->genInfoBundle()));
-	r.sleep();
+	r->sleep();
 	delete msg;
 }
 

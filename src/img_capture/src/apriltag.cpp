@@ -13,6 +13,7 @@ int main(int argc, char **argv)
 	//check apriltag parameter
 	GetParameterValues();
 	InitializeTags();
+	r = new ros::Rate(FPS);
 
 	//setup ros connection with other nodes
 	setupConnection(node_);
@@ -148,7 +149,7 @@ void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
 
 	//publish msg
 	img_publisher.publish(apriltag_detections);
-	r.sleep();
+	r->sleep();
 
 	//release
 	(apriltag_detections.tags).clear();
