@@ -96,8 +96,7 @@ void img_rcv_callback(const img_capture::imgRawData::ConstPtr& msg)
 	//ROS_INFO("AprilDetection of Seq : %d \n", msg->header.seq);
 	//arrange tags which are detected into apriltagInfos
 
-
-	 
+ 
 	for(unsigned int i = 0; i < detections.size(); ++i)
     {
         // skip bad detections
