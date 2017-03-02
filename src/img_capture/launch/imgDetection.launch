@@ -1,8 +1,8 @@
 <launch>
   <!--global arguments can be overwriten by include-->
   <arg name="node_suffix" default="_dev_" />
-  <arg name="use_device_id" default="0" />
-  <arg name="show_img" default="false" />  
+  <arg name="use_device_id" default="1" />
+  <arg name="show_img" default="true" />  
   <arg name="sensor_output_name" default="apriltag_info" />
   <arg name="handler_name" default="ApriltagHandler" />
 
